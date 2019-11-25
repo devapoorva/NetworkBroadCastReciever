@@ -7,10 +7,14 @@ import android.net.ConnectivityManager;
 import com.xbrainz.networkbroadcastreciever.broadcast.NetworkStateChecker;
 
 public class BaseActivity extends Application {
-    NetworkStateChecker stateChecker = new NetworkStateChecker();
+
+    private static BaseActivity mInstance;
+    private NetworkStateChecker stateChecker= new NetworkStateChecker();
+
     @Override
     public void onCreate() {
         super.onCreate();
+        mInstance = this;
         registerBroadcast();
     }
 
@@ -20,9 +24,14 @@ public class BaseActivity extends Application {
         //check = 1;
     }
 
-   /* public void unRegisterReceiver()
-    {
-        unregisterReceiver(stateChecker);
-    }*/
+    public static synchronized BaseActivity getInstance() {
+        return mInstance;
+    }
+
+
+
+    public void setConnectivityListener(NetworkStateChecker.ConnectivityReceiverListener listener) {
+        NetworkStateChecker.connectivityReceiverListener = listener;
+    }
 
 }

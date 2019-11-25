@@ -1,5 +1,6 @@
 package com.xbrainz.networkbroadcastreciever.broadcast;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,23 +8,40 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Toast;
 
+import com.xbrainz.networkbroadcastreciever.activities.MyAlertDialog;
+import com.xbrainz.networkbroadcastreciever.application.BaseActivity;
+import com.xbrainz.networkbroadcastreciever.utils.Util;
+
+import static com.xbrainz.networkbroadcastreciever.utils.Util.checkNetworkConnection;
+
 public class NetworkStateChecker extends BroadcastReceiver {
 
+    public static ConnectivityReceiverListener connectivityReceiverListener;
+
+    public NetworkStateChecker() {
+        super();
+    }
+
     @Override
-    public void onReceive(Context context, Intent intent) {
-        if(checkNetworkConnection(context))
+    public void onReceive(Context context, Intent arg1) {
+
+        if(Util.checkNetworkConnection(context))
         {
-            Toast.makeText(context,"Net on",Toast.LENGTH_SHORT).show();
+            if (connectivityReceiverListener != null) {
+                connectivityReceiverListener.onNetworkConnectionChanged(Util.checkNetworkConnection(context));
+            }
         }
         else
         {
-            Toast.makeText(context,"No network",Toast.LENGTH_SHORT).show();
+            Intent i=new Intent(context.getApplicationContext(), MyAlertDialog.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(i);
         }
+
     }
 
-    private boolean checkNetworkConnection(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return (networkInfo!=null && networkInfo.isConnected());
+
+    public interface ConnectivityReceiverListener {
+        void onNetworkConnectionChanged(boolean isConnected);
     }
 }
